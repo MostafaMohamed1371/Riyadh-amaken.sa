@@ -32,6 +32,16 @@ class Category extends Model
         return $this->hasMany(Place::class);
     }
 
+    public function activities(): HasMany
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

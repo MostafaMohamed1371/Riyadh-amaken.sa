@@ -13,14 +13,14 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $categories = Category::active()->withCount('places')->orderBy('sort_order')->paginate(request('per_page', 15));
+        $categories = Category::active()->withCount(['places', 'activities'])->orderBy('sort_order')->paginate(request('per_page', 15));
 
         return $this->paginatedResponse(CategoryResource::collection($categories));
     }
 
     public function show(string $slug)
     {
-        $category = Category::active()->withCount('places')->where('slug', $slug)->firstOrFail();
+        $category = Category::active()->withCount(['places', 'activities'])->where('slug', $slug)->firstOrFail();
 
         return $this->successResponse(new CategoryResource($category));
     }

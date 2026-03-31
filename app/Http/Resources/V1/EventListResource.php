@@ -27,6 +27,12 @@ class EventListResource extends JsonResource
             'ticket_price' => $this->ticket_price,
             'image' => $this->image,
             'is_featured' => $this->is_featured,
+            'category' => $this->when(
+                $this->relationLoaded('category'),
+                fn () => $this->category
+                    ? (new CategorySummaryResource($this->category))->resolve($request)
+                    : null
+            ),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
         ];
     }

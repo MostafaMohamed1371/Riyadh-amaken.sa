@@ -13,6 +13,30 @@
           "request": { "method": "GET", "header": [], "url": "{{base_url}}/home" }
         },
         {
+          "name": "Sliders (list)",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/sliders?per_page=15" }
+        },
+        {
+          "name": "Slider by id",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/sliders/{{resource_id}}" }
+        },
+        {
+          "name": "Gallery (list)",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/gallery?per_page=15" }
+        },
+        {
+          "name": "Gallery item by id",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/gallery/{{resource_id}}" }
+        },
+        {
+          "name": "Activities (list)",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/activities?per_page=15" }
+        },
+        {
+          "name": "Activity by id",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/activities/{{resource_id}}" }
+        },
+        {
           "name": "Categories",
           "request": { "method": "GET", "header": [], "url": "{{base_url}}/categories" }
         },
@@ -63,6 +87,10 @@
             "header": [],
             "url": "{{base_url}}/schedule/suggestions?arrival_date=2026-04-01&departure_date=2026-04-07&per_page=40"
           }
+        },
+        {
+          "name": "Schedule (all users)",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/schedule" }
         }
       ]
     },
@@ -102,14 +130,6 @@
     {
       "name": "Schedule — Bearer (Sanctum)",
       "item": [
-        {
-          "name": "GET My schedule",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
-            "url": "{{base_url}}/schedule"
-          }
-        },
         {
           "name": "POST Add to schedule",
           "request": {

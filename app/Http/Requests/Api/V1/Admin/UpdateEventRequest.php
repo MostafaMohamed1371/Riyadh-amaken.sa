@@ -17,6 +17,7 @@ class UpdateEventRequest extends FormRequest
         $eventId = $this->route('event')?->id ?? $this->route('event');
 
         return [
+            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'title' => ['sometimes', 'required', 'string', 'max:255'],
             'slug' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('events', 'slug')->ignore($eventId)],
             'short_description' => ['nullable', 'string', 'max:255'],

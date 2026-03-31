@@ -30,7 +30,13 @@
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/home` | Home payload (banners, featured, …) |
+| GET | `/home` | Home payload (sliders, categories, gallery) |
+| GET | `/sliders` | Sliders list (`?per_page=`) — **no auth** |
+| GET | `/sliders/{id}` | Single slider — **no auth** |
+| GET | `/gallery` | Gallery list (`?per_page=`) — **no auth** |
+| GET | `/gallery/{id}` | Single gallery item — **no auth** |
+| GET | `/activities` | Activities list (`?per_page=`) — **no auth** |
+| GET | `/activities/{id}` | Single activity — **no auth** |
 | GET | `/categories` | Categories list |
 | GET | `/categories/{slug}` | Category by slug (slug must start with a letter) |
 | GET | `/places` | Places list (filters query params) |
@@ -43,12 +49,12 @@
 | GET | `/search?q=` | Search |
 | GET | `/filters` | Filter helpers |
 | GET | `/schedule/suggestions` | Trip ideas: events + places for visit dates (optional `interests[]` = tag slugs) |
+| GET | `/schedule` | Public: `data.events` only (saved **events**; each `event` includes `category` when `category_id` is set) |
 
 ### Schedule (authenticated)
 
 | Method | Path | Notes |
 |--------|------|--------|
-| GET | `/schedule` | “My schedule” list (Bearer) |
 | POST | `/schedule` | Body: `{ "type": "event"\|"place", "id": <numeric id> }` |
 | PUT | `/schedule/reorder` | Body: `{ "order": [<schedule item ids in desired order>] }` (must list every id) |
 | DELETE | `/schedule/{id}` | Remove one saved item |

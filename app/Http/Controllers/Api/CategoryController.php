@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -15,7 +17,7 @@ class CategoryController extends Controller
     public function index(Request $request): JsonResponse
     {
         $perPage = min((int) $request->get('per_page', 15), 100);
-        $categories = Category::latest()->paginate($perPage);
+        $categories = Category::query()->withCount(['places', 'activities'])->latest()->paginate($perPage);
         $categories->getCollection()->transform(fn (Category $c) => $this->formatCategory($c));
 
         return response()->json($categories);
@@ -23,6 +25,8 @@ class CategoryController extends Controller
 
     public function show(Category $category): JsonResponse
     {
+        $category->loadCount(['places', 'activities']);
+
         return response()->json(['data' => $this->formatCategory($category)]);
     }
 
@@ -143,8 +147,20 @@ class CategoryController extends Controller
             'image' => $category->icon ? asset('storage/'.$category->icon) : null,
             'is_active' => $category->is_active,
             'sort_order' => $category->sort_order,
+            'places_count' => (int) ($category->places_count ?? $category->places()->count()),
+            'activities_count' => (int) ($category->activities_count ?? $category->activities()->count()),
+            'events_count' => $this->eventsCount($category),
             'created_at' => $category->created_at?->toIso8601String(),
             'updated_at' => $category->updated_at?->toIso8601String(),
         ];
+    }
+
+    private function eventsCount(Category $category): int
+    {
+        if (! Schema::hasColumn('events', 'category_id')) {
+            return 0;
+        }
+
+        return Event::query()->where('category_id', $category->id)->count();
     }
 }

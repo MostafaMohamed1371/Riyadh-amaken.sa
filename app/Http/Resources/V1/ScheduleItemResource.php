@@ -18,11 +18,16 @@ class ScheduleItemResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'user_id' => $this->user_id,
+            'user' => $this->whenLoaded('user', fn () => [
+                'id' => $this->user->id,
+                'name' => $this->user->name,
+            ]),
             'sort_order' => $this->sort_order,
             'type' => $type,
             'item' => $type === 'event'
-                ? new EventListResource($scheduleable)
-                : new PlaceListResource($scheduleable),
+                ? new EventDetailResource($scheduleable)
+                : new SchedulePlaceItemResource($scheduleable),
         ];
     }
 }

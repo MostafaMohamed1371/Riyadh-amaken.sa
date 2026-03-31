@@ -16,7 +16,7 @@ class EventController extends Controller
 
     public function index()
     {
-        $events = Event::with('tags')->latest()->paginate(request('per_page', 15));
+        $events = Event::with(['tags', 'category'])->latest()->paginate(request('per_page', 15));
 
         return $this->paginatedResponse(EventListResource::collection($events));
     }
@@ -29,14 +29,14 @@ class EventController extends Controller
 
         $event = Event::create($payload);
         $event->tags()->sync($tagIds);
-        $event->load('tags');
+        $event->load(['tags', 'category']);
 
         return $this->successResponse(new EventDetailResource($event), 'Event created.', 201);
     }
 
     public function show(Event $event)
     {
-        $event->load('tags');
+        $event->load(['tags', 'category']);
 
         return $this->successResponse(new EventDetailResource($event));
     }
@@ -51,7 +51,7 @@ class EventController extends Controller
         if (is_array($tagIds)) {
             $event->tags()->sync($tagIds);
         }
-        $event->load('tags');
+        $event->load(['tags', 'category']);
 
         return $this->successResponse(new EventDetailResource($event), 'Event updated.');
     }

@@ -6,9 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\ReorderScheduleRequest;
 use App\Http\Requests\Api\V1\ScheduleSuggestionsRequest;
 use App\Http\Requests\Api\V1\StoreScheduleItemRequest;
-use App\Http\Resources\V1\EventListResource;
-use App\Http\Resources\V1\PlaceListResource;
-use App\Http\Resources\V1\ScheduleItemResource;
+use App\Http\Resources\V1\EventDetailResource;
+use App\Http\Resources\V1\PlaceScheduleListResource;
 use App\Models\Event;
 use App\Models\Place;
 use App\Models\ScheduleItem;
@@ -40,7 +39,7 @@ class ScheduleController extends Controller
 
         $eventsQuery = Event::query()
             ->active()
-            ->with('tags')
+            ->with(['tags', 'category'])
             ->where(function ($q) use ($arrival, $departure) {
                 $q->whereRaw('DATE(start_date) <= ?', [$departure->toDateString()])
                     ->whereRaw('COALESCE(DATE(end_date), DATE(start_date)) >= ?', [$arrival->toDateString()]);
@@ -66,8 +65,8 @@ class ScheduleController extends Controller
             'arrival_date' => $arrival->toDateString(),
             'departure_date' => $departure->toDateString(),
             'interests' => $interests,
-            'events' => EventListResource::collection($events),
-            'places' => PlaceListResource::collection($places),
+            'events' => EventDetailResource::collection($events),
+            'places' => PlaceScheduleListResource::collection($places),
             'meta' => [
                 'per_page' => $perPage,
                 'events_returned' => $events->count(),
@@ -77,21 +76,42 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Authenticated user's saved itinerary ("My Schedule").
+     * Public schedule feed: saved **events** only (full event + nested category on the event when set).
      */
     public function index(Request $request)
     {
-        $items = $request->user()->scheduleItems()->get();
-        $items->loadMissing('scheduleable');
-        $items->each(function (ScheduleItem $item) {
-            if ($item->scheduleable instanceof Event) {
-                $item->scheduleable->load('tags');
-            } elseif ($item->scheduleable instanceof Place) {
-                $item->scheduleable->load(['category', 'tags']);
-            }
-        });
+        $items = ScheduleItem::query()
+            ->where('scheduleable_type', Event::class)
+            ->with('user')
+            ->orderByDesc('created_at')
+            ->get();
 
-        return $this->successResponse(ScheduleItemResource::collection($items));
+        $items->loadMissing('scheduleable');
+
+        $events = [];
+
+        foreach ($items as $item) {
+            $scheduleable = $item->scheduleable;
+            if (! $scheduleable instanceof Event) {
+                continue;
+            }
+
+            $userPayload = $item->relationLoaded('user') && $item->user
+                ? ['id' => $item->user->id, 'name' => $item->user->name]
+                : null;
+
+            $scheduleable->load(['tags', 'category']);
+            $events[] = [
+                'schedule_item_id' => $item->id,
+                'user_id' => $item->user_id,
+                'user' => $userPayload,
+                'event' => (new EventDetailResource($scheduleable))->resolve($request),
+            ];
+        }
+
+        return $this->successResponse([
+            'events' => $events,
+        ]);
     }
 
     public function store(StoreScheduleItemRequest $request)
@@ -125,14 +145,21 @@ class ScheduleController extends Controller
             'sort_order' => $nextOrder,
         ]);
 
-        $item->loadMissing('scheduleable');
+        $item->loadMissing(['scheduleable', 'user']);
+        $payload = [
+            'schedule_item_id' => $item->id,
+            'user_id' => $item->user_id,
+            'user' => ['id' => $user->id, 'name' => $user->name],
+        ];
         if ($item->scheduleable instanceof Event) {
-            $item->scheduleable->load('tags');
+            $item->scheduleable->load(['tags', 'category']);
+            $payload['event'] = (new EventDetailResource($item->scheduleable))->resolve($request);
         } else {
-            $item->scheduleable->load(['category', 'tags']);
+            $payload['type'] = 'place';
+            $payload['place_id'] = $item->scheduleable_id;
         }
 
-        return $this->successResponse(new ScheduleItemResource($item), 'Added to your schedule.', 201);
+        return $this->successResponse($payload, 'Added to your schedule.', 201);
     }
 
     public function destroy(Request $request, ScheduleItem $scheduleItem)

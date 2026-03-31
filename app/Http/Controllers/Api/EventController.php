@@ -14,7 +14,7 @@ class EventController extends Controller
     public function index(Request $request): JsonResponse
     {
         $perPage = min((int) $request->get('per_page', 15), 100);
-        $events = Event::latest('start_date')->paginate($perPage);
+        $events = Event::with('category')->latest('start_date')->paginate($perPage);
         $events->getCollection()->transform(fn (Event $e) => $this->formatEvent($e));
 
         return response()->json($events);
@@ -22,6 +22,8 @@ class EventController extends Controller
 
     public function show(Event $event): JsonResponse
     {
+        $event->load('category');
+
         return response()->json(['data' => $this->formatEvent($event)]);
     }
 
@@ -46,6 +48,7 @@ class EventController extends Controller
             'organizer' => 'nullable|string|max:255',
             'is_featured' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
+            'category_id' => 'nullable|integer|exists:categories,id',
         ], [
             'title.required' => 'The title field is required.',
             'date.date' => 'The date is not valid (use YYYY-MM-DD).',
@@ -69,6 +72,7 @@ class EventController extends Controller
             'organizer' => $validated['organizer'] ?? null,
             'is_featured' => $validated['is_featured'] ?? false,
             'is_active' => $validated['is_active'] ?? true,
+            'category_id' => $validated['category_id'] ?? null,
         ];
 
         if (Event::query()->where('slug', $payload['slug'])->exists()) {
@@ -79,6 +83,7 @@ class EventController extends Controller
         }
 
         $event = Event::create($payload);
+        $event->load('category');
 
         return response()->json(['data' => $this->formatEvent($event)], 201);
     }
@@ -104,6 +109,7 @@ class EventController extends Controller
             'organizer' => 'nullable|string|max:255',
             'is_featured' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
+            'category_id' => 'nullable|integer|exists:categories,id',
         ], [
             'title.required' => 'The title field is required.',
             'date.date' => 'The date is not valid (use YYYY-MM-DD).',
@@ -150,7 +156,7 @@ class EventController extends Controller
         if (array_key_exists('end_time', $validated)) {
             $payload['end_time'] = $validated['end_time'];
         }
-        foreach (['location', 'ticket_price', 'booking_url', 'image', 'organizer', 'is_featured', 'is_active'] as $field) {
+        foreach (['location', 'ticket_price', 'booking_url', 'image', 'organizer', 'is_featured', 'is_active', 'category_id'] as $field) {
             if (array_key_exists($field, $validated)) {
                 $payload[$field] = $validated[$field];
             }
@@ -171,6 +177,7 @@ class EventController extends Controller
         }
 
         $event->update($payload);
+        $event->load('category');
 
         return response()->json(['data' => $this->formatEvent($event)]);
     }
@@ -187,8 +194,28 @@ class EventController extends Controller
 
     private function formatEvent(Event $event): array
     {
+        $event->loadMissing('category');
+
+        $categoryPayload = null;
+        if ($event->category) {
+            $icon = $event->category->icon;
+            $image = null;
+            if ($icon) {
+                $image = str_starts_with($icon, 'http://') || str_starts_with($icon, 'https://')
+                    ? $icon
+                    : asset('storage/'.$icon);
+            }
+            $categoryPayload = [
+                'id' => $event->category->id,
+                'title' => $event->category->name,
+                'image' => $image,
+            ];
+        }
+
         return [
             'id' => $event->id,
+            'category_id' => $event->category_id,
+            'category' => $categoryPayload,
             'title' => $event->title,
             'slug' => $event->slug,
             'description' => $event->short_description ?? $event->full_description,

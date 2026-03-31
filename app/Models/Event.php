@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Event extends Model
@@ -11,6 +12,7 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
+        'category_id',
         'title',
         'slug',
         'short_description',
@@ -34,6 +36,7 @@ class Event extends Model
     protected function casts(): array
     {
         return [
+            'category_id' => 'integer',
             'start_date' => 'date',
             'end_date' => 'date',
             'start_time' => 'datetime:H:i:s',
@@ -43,6 +46,11 @@ class Event extends Model
             'is_featured' => 'boolean',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function tags(): BelongsToMany

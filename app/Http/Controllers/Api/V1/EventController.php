@@ -15,7 +15,7 @@ class EventController extends Controller
     public function index()
     {
         $events = Event::query()
-            ->with('tags')
+            ->with(['tags', 'category'])
             ->active()
             ->when(request('search'), fn ($q, $v) => $q->where(function ($sub) use ($v) {
                 $sub->where('title', 'like', "%{$v}%")
@@ -44,7 +44,7 @@ class EventController extends Controller
 
         abort_if(! $event->is_active, 404);
 
-        $event->load('tags');
+        $event->load(['tags', 'category']);
 
         return $this->successResponse(new EventDetailResource($event));
     }

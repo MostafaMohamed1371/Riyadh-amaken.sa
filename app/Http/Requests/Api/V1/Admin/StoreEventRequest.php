@@ -14,6 +14,7 @@ class StoreEventRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', 'unique:events,slug'],
             'short_description' => ['nullable', 'string', 'max:255'],

@@ -23,6 +23,8 @@ class CategoryResource extends JsonResource
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
             'places_count' => $this->whenCounted('places'),
+            'activities_count' => $this->whenCounted('activities'),
+            'events_count' => 0,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
