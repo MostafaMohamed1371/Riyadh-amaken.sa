@@ -1,0 +1,346 @@
+{
+  "info": {
+    "_postman_id": "9df0f9f3-5600-4dd7-aa2e-4f50f0a01191",
+    "name": "Riyadh Amaken API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Home",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/home" }
+        },
+        {
+          "name": "Categories",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/categories" }
+        },
+        {
+          "name": "Category by Slug",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/categories/{{category_slug}}" }
+        },
+        {
+          "name": "Places",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/places?per_page=10" }
+        },
+        {
+          "name": "Featured Places",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/places/featured?per_page=10" }
+        },
+        {
+          "name": "Place by Slug",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/places/{{place_slug}}" }
+        },
+        {
+          "name": "Events",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/events?per_page=10" }
+        },
+        {
+          "name": "Featured Events",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/events/featured?per_page=10" }
+        },
+        {
+          "name": "Event by Slug",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/events/{{event_slug}}" }
+        },
+        {
+          "name": "Tags (public)",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/tags" }
+        },
+        {
+          "name": "Search",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/search?q=riyadh&type=all" }
+        },
+        {
+          "name": "Filters",
+          "request": { "method": "GET", "header": [], "url": "{{base_url}}/filters" }
+        },
+        {
+          "name": "Schedule suggestions (trip)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/schedule/suggestions?arrival_date=2026-04-01&departure_date=2026-04-07&per_page=40"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth (api)",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"your-password\"\n}"
+            },
+            "url": "{{legacy_base_url}}/login"
+          }
+        },
+        {
+          "name": "User (me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+            "url": "{{legacy_base_url}}/user"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+            "url": "{{legacy_base_url}}/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Schedule — Bearer (Sanctum)",
+      "item": [
+        {
+          "name": "GET My schedule",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+            "url": "{{base_url}}/schedule"
+          }
+        },
+        {
+          "name": "POST Add to schedule",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"place\",\n  \"id\": 1\n}"
+            },
+            "url": "{{base_url}}/schedule"
+          }
+        },
+        {
+          "name": "PUT Reorder",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order\": [1, 2]\n}"
+            },
+            "url": "{{base_url}}/schedule/reorder"
+          }
+        },
+        {
+          "name": "DELETE Item",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+            "url": "{{base_url}}/schedule/{{schedule_item_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Management (api) — Bearer (Sanctum)",
+      "item": [
+        {
+          "name": "Places",
+          "item": [
+            {
+              "name": "GET List places",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+                "url": "{{legacy_base_url}}/manage/places?per_page=15"
+              }
+            },
+            {
+              "name": "POST Create place",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"category_id\": 1,\n  \"name\": \"Kingdom Centre Tower\",\n  \"slug\": \"kingdom-centre-tower\",\n  \"short_description\": \"Iconic landmark\",\n  \"city\": \"Riyadh\",\n  \"is_active\": true\n}"
+                },
+                "url": "{{legacy_base_url}}/manage/places"
+              }
+            },
+            {
+              "name": "GET Show place",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+                "url": "{{legacy_base_url}}/manage/places/{{resource_id}}"
+              }
+            },
+            {
+              "name": "PUT Update place",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"category_id\": 1,\n  \"name\": \"Kingdom Centre Tower\",\n  \"slug\": \"kingdom-centre-tower\",\n  \"short_description\": \"Updated description\",\n  \"city\": \"Riyadh\"\n}"
+                },
+                "url": "{{legacy_base_url}}/manage/places/{{resource_id}}"
+              }
+            },
+            {
+              "name": "DELETE place",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+                "url": "{{legacy_base_url}}/manage/places/{{resource_id}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Banners",
+          "item": [
+            {
+              "name": "GET List banners",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+                "url": "{{legacy_base_url}}/manage/banners"
+              }
+            },
+            {
+              "name": "POST Create banner",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Discover Riyadh\",\n  \"subtitle\": \"Your city guide\",\n  \"image\": \"https://example.com/banner.jpg\",\n  \"button_text\": \"Explore\",\n  \"button_url\": \"https://example.com\",\n  \"sort_order\": 0\n}"
+                },
+                "url": "{{legacy_base_url}}/manage/banners"
+              }
+            },
+            {
+              "name": "GET Show banner",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+                "url": "{{legacy_base_url}}/manage/banners/{{resource_id}}"
+              }
+            },
+            {
+              "name": "PUT Update banner",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Discover Riyadh\",\n  \"image\": \"https://example.com/banner.jpg\",\n  \"sort_order\": 1\n}"
+                },
+                "url": "{{legacy_base_url}}/manage/banners/{{resource_id}}"
+              }
+            },
+            {
+              "name": "DELETE banner",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+                "url": "{{legacy_base_url}}/manage/banners/{{resource_id}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tags (management)",
+          "item": [
+            {
+              "name": "GET List tags",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+                "url": "{{legacy_base_url}}/manage/tags"
+              }
+            },
+            {
+              "name": "POST Create tag",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Family\",\n  \"slug\": \"family\"\n}"
+                },
+                "url": "{{legacy_base_url}}/manage/tags"
+              }
+            },
+            {
+              "name": "GET Show tag",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+                "url": "{{legacy_base_url}}/manage/tags/{{resource_id}}"
+              }
+            },
+            {
+              "name": "PUT Update tag",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Family\",\n  \"slug\": \"family\"\n}"
+                },
+                "url": "{{legacy_base_url}}/manage/tags/{{resource_id}}"
+              }
+            },
+            {
+              "name": "DELETE tag",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+                "url": "{{legacy_base_url}}/manage/tags/{{resource_id}}"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000/api" },
+    { "key": "legacy_base_url", "value": "http://127.0.0.1:8000/api" },
+    { "key": "auth_token", "value": "" },
+    { "key": "category_slug", "value": "restaurants" },
+    { "key": "place_slug", "value": "" },
+    { "key": "event_slug", "value": "" },
+    { "key": "resource_id", "value": "1" },
+    { "key": "schedule_item_id", "value": "1" }
+  ]
+}
